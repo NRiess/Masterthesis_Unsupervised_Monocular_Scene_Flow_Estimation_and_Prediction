@@ -1,0 +1,6 @@
+Example for command to clone repository using the personal acces token:
+
+git clone https://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@github.com/NRiess/self-mono-sf-swin-pred-x123-evaluation.git
+
+personal acces token:
+https://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@github.com/NRiess/self-mono-sf-swin-pred-x123-evaluation.git
