@@ -8,9 +8,10 @@ The results of our model can be seen in the next GIF. The first two images of ea
 Susbsequently a scene flow is predicted between the point cloud corresponding of the latest camera frame and a predicted future point cloud.                             
 
 <p align="center">
-  Two most recent frames and one future frame for each sequence:                                                                                          
+  Two most recent frames and one future frame for each sequence:       
+</p>
   
-  
+<p align="center">
   <img src=demo/validation_images.gif width="400" height="100"/> 
 </p>
 
