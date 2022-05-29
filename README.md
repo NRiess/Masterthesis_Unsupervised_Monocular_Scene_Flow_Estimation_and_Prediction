@@ -31,7 +31,7 @@ Please run the following commands:
   ```Shell
   conda env create -f environment.yml
   conda install pytorch==1.7.0 torchvision==0.8.0 cudatoolkit=11.4 -c pytorch
-  conda activate dfn-pytorch
+  conda activate sf-swin
   ./install_modules.sh
   ```
 For PyTorch version > 1.3:
@@ -95,3 +95,6 @@ Please run main.py using the arguments --debug=False and --azure=False. Additona
 * Adjust the version number of the environment in "run_with_azure.py" according to the version you want to use
 * Type in the your subscription_id, resource_group and workspace_name in "run_with_azure.py" 
 * Run the file to start the training.
+
+## Evaluation
+The individual models can be evaluated by setting --checkpoint=$PATH_TO_CHECKPOIN$ and --debug=False when running main.py.
