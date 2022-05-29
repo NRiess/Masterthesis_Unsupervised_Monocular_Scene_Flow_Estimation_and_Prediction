@@ -8,7 +8,7 @@ import numpy as np
 
 
 
-rootdir = '/home/rns4fe/Pictures/Pictures_for_Presentation/validation_image_60_x123-swin_different_perspectives_2'
+rootdir = 'D:/Nicolas/Pictures/Pictures for Presentation/validation_images_point_clouds_scene_flow_with_prediction'
 
 def plot_image(image):
     image = np.array(image)
@@ -41,5 +41,5 @@ for subdir, dirs, files in os.walk(rootdir):
         print(subdir, filename + '_cropped.png')
         # plt.savefig(os.path.join(subdir, filename + '_cropped.png'), dpi=300)
         image = image.save(os.path.join(
-            '/home/rns4fe/Pictures/Pictures_for_Presentation/validation_image_60_x123-swin_different_perspectives_2_cropped'
+            'D:/Nicolas/Pictures/Pictures for Presentation/validation_images_point_clouds_scene_flow_with_prediction_cropped'
             , filename))
