@@ -2,13 +2,13 @@
 This repository contains the code of several experiments conducted by Nicolas Riess in the course of a Masterthesis with the title "Unsupervised Monocular Scene Flow Estimation and Prediction". The scene flow estimator and predictor presented here is based on the ![Scene flow estimator of Junhwa Hur and Stefan Roth](https://arxiv.org/abs/2004.04143).
 
 Using two subseqent image of only one camera, a point cloud is constructed as can be seen seen in the following. 
-<img src="demo/validation_image_60_x123-swin_different_perspectives.gif" width="500" height="250"/> 
+<p align="center"><img src="demo/validation_image_60_x123-swin_different_perspectives.gif" width="500" height="250"/> </p>
 
 The results of our model can be seen in the next GIF. The first two images of each sequence are the input of the neural network. A scene flow, which computes the displacement between the corresponding point clouds of the two subsequent camera frames, is estimated. It is visualized with pink lines.
 Susbsequently a scene flow is predicted between the point cloud corresponding of the latest camera frame and a predicted future point cloud.                             
 
 <p align="center"><img src=demo/validation_images.gif width="400" height="100"/> </p>
-<p align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="300"/> </p>
+<p align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="400"/> </p>
 
 ## Create environment
 
