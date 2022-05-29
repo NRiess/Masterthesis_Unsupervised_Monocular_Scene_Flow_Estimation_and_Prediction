@@ -72,6 +72,7 @@ Please execute the following steps after downloading the two datasets:
 
 ## Start training
 ### Locally:
+Please run main.py using the arguments --debug=False and --azure=False.
 
 ### On azure:
 * Adjust the version number of the environment in "run_with_azure.py" according to the version you want to use
