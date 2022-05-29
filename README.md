@@ -7,8 +7,14 @@ Using two subseqent image of only one camera, a point cloud is constructed as ca
 The results of our model can be seen in the next GIF. The first two images of each sequence are the input of the neural network. A scene flow, which computes the displacement between the corresponding point clouds of the two subsequent camera frames, is estimated. It is visualized with pink lines.
 Susbsequently a scene flow is predicted between the point cloud corresponding of the latest camera frame and a predicted future point cloud.                             
 
-<p align="center"><img src=demo/validation_images.gif width="400" height="100"/> </p>
-<p align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="400"/> </p>
+<p align="center">
+  Two most recent frames and one future frame for each sequence:
+  <img src=demo/validation_images.gif width="400" height="100"/> 
+</p>
+<p 
+   Point clouds of two most recent frames, corresponding estimated scene flow, future frame and corresponding predicted scene flow:
+   align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="400"/> 
+</p>
 
 ## Create environment
 
