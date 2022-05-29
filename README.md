@@ -8,7 +8,7 @@ The results of our model can be seen in the next GIF. The first two images of ea
 Susbsequently a scene flow is predicted between the point cloud corresponding of the latest camera frame and a predicted future point cloud.                             
 
 <p align="center"><img src=demo/validation_images.gif width="400" height="100"/> </p>
-<p align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="800" height="250"/> </p>
+<p align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="300"/> </p>
 
 ## Create environment
 
