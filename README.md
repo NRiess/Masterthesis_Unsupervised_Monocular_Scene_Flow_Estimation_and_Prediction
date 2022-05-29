@@ -13,10 +13,10 @@ Susbsequently a scene flow is predicted between the point cloud corresponding of
   <img src=demo/validation_images.gif width="400" height="100"/> 
 </p>
 
-<p 
+<p align="center">
    Point clouds of two most recent frames, corresponding estimated scene flow, future frame and corresponding predicted scene flow:
    
-   align="center"><img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="400"/> 
+   <img src=demo/validation_images_point_clouds_scene_flow_with_prediction.gif width="1000" height="400"/> 
 </p>
 
 ## Create environment
