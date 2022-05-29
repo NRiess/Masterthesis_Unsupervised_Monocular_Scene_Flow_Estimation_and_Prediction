@@ -71,8 +71,14 @@ Please execute the following steps after downloading the two datasets:
 
 
 ## Start training
+
 ### Locally:
-Please run main.py using the arguments --debug=False and --azure=False.
+Please run main.py using the arguments --debug=False and --azure=False. Additonally, one of of the follow strings for the argument --version can be chosen:
+* "correlation": Baseline that computes the correlation
+* "concatenated_inputs": The feature pyramid are concatenated to learn temporal relations already in the encoder
+* "stacked": Swin transformer replaces the correlation operation and receives the difference of the features and warped features as input
+* "diff": Swin transformer replaces the correlation operation and receives the difference of the features and warped features as input
+* "predict": Monocular Scene Flow estimator and predictor that processes three subsequent frames as inputs
 
 ### On azure:
 * Adjust the version number of the environment in "run_with_azure.py" according to the version you want to use
