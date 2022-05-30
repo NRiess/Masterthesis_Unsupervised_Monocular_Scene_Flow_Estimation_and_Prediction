@@ -215,7 +215,7 @@ def _parse_arguments():
     add("--save_disp2", type=tools.str2bool, default=False)
     add("--finetuning", type=tools.str2bool, default=False)
 
-    add("--version", type=str, default="stacked")
+    add("--version", type=str, default="predict")
 
     args = parser.parse_args()
     if not os.path.isdir(args.save):

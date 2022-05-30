@@ -185,7 +185,7 @@ _C.THROUGHPUT_MODE = False
 # local rank for DistributedDataParallel, given by command line argument
 _C.LOCAL_RANK = 0
 
-
+# Overwrite config with cfg file
 def _update_config_from_file(config, cfg_file):
     config.defrost()
     with open(cfg_file, 'r') as f:
@@ -200,7 +200,7 @@ def _update_config_from_file(config, cfg_file):
     config.merge_from_file(cfg_file)
     config.freeze()
 
-# Overwrite config
+# Overwrite config with arguments of the scene flow estimator and predictor
 def update_config(config, args, im_size, channel_size, embed_dim, num_heads, window_size):
     _update_config_from_file(config, args.cfg)
 
