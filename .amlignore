@@ -9,3 +9,9 @@ runs/
 run*/
 runs*/
 .git/
+runs*/
+./.git/
+./checkpoints/
+./runs/
+./Output_azure/
+./Output_local/
