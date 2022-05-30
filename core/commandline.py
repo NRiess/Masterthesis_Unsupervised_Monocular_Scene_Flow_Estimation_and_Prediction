@@ -194,7 +194,7 @@ def _parse_arguments():
     add("--azure", type=tools.str2bool, default=True)
     
     # arguments for swin
-    add("--cfg", type=str, default="models/swin/configs/swin_tiny_c24_patch4_window8_256.yaml")
+    add("--cfg", type=str, default="models/swin/configuration.yaml")
     add("--data_path", type=str, default="/home/rns4fe/Documents/kitti_raw_dataset_jpg/")
     add("--patch_size", type=int, default=2)
     add("--window_size", type=int, default=2)

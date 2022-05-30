@@ -85,8 +85,6 @@ class WindowAttention(nn.Module):
         coords_w = torch.arange(self.window_size[1])
         coords = torch.stack(torch.meshgrid([coords_h, coords_w]))  # 2, Wh, Ww
         coords_flatten = torch.flatten(coords, 1)  # 2, Wh*Ww
-        test1 = coords_flatten[:, :, None]
-        test2 = coords_flatten[:, None, :]
         relative_coords = coords_flatten[:, :, None] - coords_flatten[:, None, :]  # 2, Wh*Ww, Wh*Ww
         relative_coords = relative_coords.permute(1, 2, 0).contiguous()  # Wh*Ww, Wh*Ww, 2
         relative_coords[:, :, 0] += self.window_size[0] - 1  # shift to start from 0
@@ -117,21 +115,10 @@ class WindowAttention(nn.Module):
         qkv = self.qkv(x)
         qkv = qkv.reshape(B_, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]
-
-        # q = self.q(x)
-        # k = self.k(x_warped)
-        # v = self.v(torch.cat((x, x_warped), dim=2))  # concatenation along spatial dimension
-        # qkv = torch.cat((q, k, v), dim=2)
-        # qkv = qkv.reshape(B_, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
-        # q, k, v = qkv[0], qkv[1], qkv[2]
-
         q = q * self.scale
         attn = (q @ k.transpose(-2, -1))
 
-        # test1 = torch.range(0,175)
-        # test = self.relative_position_index.view(-1).view(self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)[:,:,0].cpu().detach().numpy()
-        # test2 = test1[self.relative_position_index.view(-1)].cpu().detach().numpy()
-
+        # replaced relative positional embedding with absolute positional embedding
         # relative_position_bias = self.relative_position_bias_table[self.relative_position_index.view(-1)].view(
         #     self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)  # Wh*Ww,Wh*Ww,nH
         # relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
@@ -148,12 +135,8 @@ class WindowAttention(nn.Module):
         attn = self.attn_drop(attn)
 
         x = (attn @ v).transpose(1, 2).reshape(B_, N, C)
-        # ------------------- leave out ----------------------------
         x = self.proj(x)
         x = self.proj_drop(x)
-        # ----------------------------------------------------------
-        # x = self.proj(x)
-        # x = self.proj_drop(x)
         return x
 
     def extra_repr(self) -> str:
@@ -248,25 +231,19 @@ class SwinTransformerBlock(nn.Module):
         assert L == H * W, "input feature has wrong size"
 
         # ------------- leave out ----------------------
-        shortcut = x
         x = self.norm1(x)
         # -----------------------------------
         x = x.view(B, H, W, C)
-        # x_warped = x_warped.view(B, H, W, C)
 
         # cyclic shift
         if self.shift_size[0] > 0 or self.shift_size[1] > 0:
             shifted_x = torch.roll(x, shifts=(-self.shift_size[0], -self.shift_size[1]), dims=(1, 2))
-            # shifted_x_warped = torch.roll(x_warped, shifts=(-self.shift_size[0], -self.shift_size[1]), dims=(1, 2))
         else:
             shifted_x = x
-            # shifted_x_warped = x_warped
 
         # partition windows
         x_windows = window_partition(shifted_x, self.window_size)  # nW*B, window_size, window_size, C
-        # x_windows_warped = window_partition(shifted_x_warped, self.window_size)
         x_windows = x_windows.view(-1, self.window_size[0] * self.window_size[1], C)  # nW*B, window_size*window_size, C
-        # x_windows_warped = x_windows_warped.view(-1, self.window_size[0] * self.window_size[1], C)
 
         # W-MSA/SW-MSA
         attn_windows = self.attn(x_windows, mask=self.attn_mask)  # nW*B, window_size*window_size, C
@@ -455,10 +432,8 @@ class PatchEmbed(nn.Module):
         assert H == self.img_size[0] and W == self.img_size[
             1], f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
         x = self.proj(x).flatten(2).transpose(1, 2)
-        # ------------------ leave out ----------------------
         if self.norm is not None:
             x = self.norm(x)
-        # --------------------------------------------------
         return x  # B Ph*Pw C
 
     def flops(self):
@@ -520,8 +495,8 @@ class SwinTransformer(nn.Module):
 
         # absolute position embedding
         if self.ape:
+            # original absolute postional embedding:
             # self.absolute_pos_embed = nn.Parameter(torch.zeros(1, num_patches, embed_dim))
-            # trunc_normal_(self.absolute_pos_embed, std=.02)
             if args.version=="stacked":
                 self.num_inputs=2
             elif args.version=="diff":
@@ -560,6 +535,7 @@ class SwinTransformer(nn.Module):
 
         self.apply(self._init_weights)
 
+        # replaced relative positional embedding with absolute positional embedding
         # self.relative_position_bias_table = nn.Parameter(torch.zeros((2 * window_size[0] - 1) * (2 * window_size[1] - 1), 1))
         # torch.nn.init.normal_(self.relative_position_bias_table, mean=0.0, std=0.02)
 
@@ -588,28 +564,20 @@ class SwinTransformer(nn.Module):
         if args.version == "correlation" or args.version == "diff" or args.version == "stacked" or args.version == "concatenated_inputs":
             attention_chs = [81]*5
 
-        B, C, H, W = x.shape  # 2,256,8,26
+        B, C, H, W = x.shape
         if self.ape:
-            test = self.absolute_pos_embed.repeat(B,self.num_inputs,1,1)
             x = x + self.absolute_pos_embed.repeat(B,self.num_inputs,1,1)
-        x = self.patch_embed(x)  # 2,208,64
-        # if self.ape:
-        #     x = x + self.absolute_pos_embed
+        x = self.patch_embed(x)
         x = self.pos_drop(x)
-        # x_warped = self.patch_embed(x_warped)
-        # x_warped = self.pos_drop(x_warped)
+
 
 
         out_channel = attention_chs[l]
         for layer in self.layers:
             x = layer(x,l)
-            # ------------- leave out -------------------
             x = self.norm(x)  # B L C
-            # -------------------------------------------
 
         x = x.view(B, out_channel, H, W)
-
-        # x_original_view = x.view(x_original_view.size(dim=0), x_original_view.size(dim=1), Ph, Pw)
 
         return x
 

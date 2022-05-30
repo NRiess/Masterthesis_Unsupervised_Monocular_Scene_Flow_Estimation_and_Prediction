@@ -17,7 +17,7 @@ from utils.interpolation import interpolate2d_as
 from utils.sceneflow_util import flow_horizontal_flip, intrinsic_scale, get_pixelgrid, post_processing
 
 from models.swin import build_model
-from models.swin.config_swin import get_config
+from models.swin.config import get_config
 import time
 
 class MonoSceneFlow(nn.Module):
@@ -280,12 +280,14 @@ class MonoSceneFlow(nn.Module):
                 flow_f = flow_f + flow_f_res
                 flow_b = flow_b + flow_b_res
 
-            # upsampling or post-processing
+
 
             # attention_f_list.append(attention_f)
             # attention_b_list.append(attention_b)
             # # corr_f_list.append(out_corr_relu_f)
             # # corr_b_list.append(out_corr_relu_b)
+
+            # upsampling or post-processing
             if l != self.output_level:
                 disp_l1 = self.sigmoid(disp_l1) * 0.3
                 disp_l2 = self.sigmoid(disp_l2) * 0.3
@@ -351,13 +353,15 @@ class MonoSceneFlow(nn.Module):
         _, pts2, pts2_tf, output_depth2 = self.warping_layer_sf(x1_raw, interpolate2d_as(flow_b, x1_raw),
                                                                 interpolate2d_as(disp_l2, x1_raw), k2,
                                                                 input_dict['aug_size'])
-        output_depth_1.append(output_depth1)
-        output_depth_2.append(output_depth2)
+
         pts_1.append(pts1)
         pts_2.append(pts2)
         pts_1tf.append(pts1_tf)
         pts_2tf.append(pts2_tf)
+        output_depth_1.append(output_depth1)
+        output_depth_2.append(output_depth2)
 
+        # Save data in output_dict
         output_dict['flow_f'] = upsample_outputs_as(sceneflows_f[::-1], x1_rev)
         output_dict['flow_b'] = upsample_outputs_as(sceneflows_b[::-1], x1_rev)
         output_dict['flowf'] = sceneflows_f[::-1]
@@ -378,8 +382,6 @@ class MonoSceneFlow(nn.Module):
         output_dict['k2'] = k2
         output_dict['x1_raw'] = x1_raw
         output_dict['x2_raw'] = x2_raw
-
-
         if self._args.version == "predict":
             output_dict['k3'] = k3
             output_dict['x3_raw'] = x3_raw
@@ -413,7 +415,6 @@ class MonoSceneFlow(nn.Module):
         output_dict = {}
 
         ## Left
-        # output_dict = self.run_pwc(input_dict, input_dict['input_l1_aug'], input_dict['input_l2_aug'], input_dict['input_k_l1_aug'], input_dict['input_k_l2_aug'])
         if not self._args.test:
             output_dict = self.run_pwc(input_dict, mode="l_aug")
         else:
@@ -470,10 +471,7 @@ class MonoSceneFlow(nn.Module):
             output_dict_flip = self.run_pwc(input_dict, x1_raw=input_l1_flip, x2_raw=input_l2_flip, k1=k_l1_flip,
                                             k2=k_l2_flip)
 
-            flow_f_pp = []
-            flow_b_pp = []
-            disp_l1_pp = []
-            disp_l2_pp = []
+            flow_f_pp, flow_b_pp, disp_l1_pp, disp_l2_pp = [], [], [], []
 
             for ii in range(0, len(output_dict_flip['flow_f'])):
                 flow_f_pp.append(

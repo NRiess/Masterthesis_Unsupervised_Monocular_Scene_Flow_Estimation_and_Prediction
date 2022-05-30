@@ -200,7 +200,7 @@ def _update_config_from_file(config, cfg_file):
     config.merge_from_file(cfg_file)
     config.freeze()
 
-
+# Overwrite config
 def update_config(config, args, im_size, channel_size, embed_dim, num_heads, window_size):
     _update_config_from_file(config, args.cfg)
 
@@ -218,34 +218,11 @@ def update_config(config, args, im_size, channel_size, embed_dim, num_heads, win
     if args.window_size:
         config.MODEL.SWIN.WINDOW_SIZE = 8
     
-    config.DATA.IMG_SIZE=im_size  # /2, /2
+    config.DATA.IMG_SIZE=im_size
     config.MODEL.SWIN.IN_CHANS = channel_size
     config.MODEL.SWIN.EMBED_DIM = embed_dim
     config.MODEL.SWIN.NUM_HEADS = num_heads
     config.MODEL.SWIN.WINDOW_SIZE = window_size
-
-    # if args.zip:
-    #     config.DATA.ZIP_MODE = True
-    # if args.cache_mode:
-    #     config.DATA.CACHE_MODE = args.cache_mode
-    # if args.pretrained:
-    #     config.MODEL.PRETRAINED = args.pretrained
-    # if args.resume:
-    #     config.MODEL.RESUME = args.resume
-    # if args.accumulation_steps:
-    #     config.TRAIN.ACCUMULATION_STEPS = args.accumulation_steps
-    # if args.use_checkpoint:
-    #     config.TRAIN.USE_CHECKPOINT = True
-    # if args.amp_opt_level:
-    #     config.AMP_OPT_LEVEL = args.amp_opt_level
-    # if args.output:
-    #     config.OUTPUT = args.output
-    # if args.tag:
-    #     config.TAG = args.tag
-    # if args.eval:
-    #     config.EVAL_MODE = True
-    # if args.throughput:
-    #     config.THROUGHPUT_MODE = True
 
     # set local rank for distributed training
     config.LOCAL_RANK = None
