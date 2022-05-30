@@ -29,11 +29,44 @@ The code has been developed with Anaconda (Python 3.7.12), PyTorch 1.10.0 and CU
 Please run the following commands:
 
   ```Shell
-  conda env create -f environment.yml
-  conda install pytorch==1.7.0 torchvision==0.8.0 cudatoolkit=11.4 -c pytorch
-  conda activate sf-swin
-  ./install_modules.sh
+conda create -n sf-swin python=3.7
+conda activate sf-win
+
+conda install pytorch==1.7.0 torchvision==0.8.0 cudatoolkit=11.4 -c pytorch
+pip install tensorboard
+pip install pypng==0.0.21
+pip install colorama==0.4.4
+pip install scikit-image==0.19.2
+pip install pytz==2022.1
+pip install tqdm==4.30.0
+pip install future==0.18.2
   ```
+
+Please go to the directory of this project and run the following command:
+  ```Shell
+cd ./models/correlation_package
+python setup.py install
+cd ../forwardwarp_package
+python setup.py install
+cd ../..
+  ```
+Alternatively, 
+  ```Shell
+bash install_modules.sh
+  ```
+can be run in the project directory.
+
+Finally, 
+  ```Shell
+pip install timm==0.5.4
+pip install pyyaml==6.0
+pip install yacs==0.1.8
+pip install matplotlib==3.5.2
+pip install open3d==0.15.2
+pip install protobuf==3.19.4
+  ```
+can be executed to install the remaining packages.
+  
 For PyTorch version > 1.3:
 Please put the **`align_corners=True`** flag in the `grid_sample` function in the following files:
   ```
@@ -63,7 +96,7 @@ To save space, we also convert the *KITTI Raw* **png** images to **jpeg**, follo
   ```   
 We also converted images in *KITTI Scene Flow 2015* as well. Please convert the png images in `image_2` and `image_3` into jpg and save them into the seperate folder **`image_2_jpg`** and **`image_3_jpg`**.  
 
-To save space further, you can delete the velodyne point data in KITTI raw data and optionally download the [*Eigen Split Projected Depth*](https://drive.google.com/file/d/1a97lgOgrChkLxi_nvRpmbsKspveQ6EyD/view?usp=sharing) for the monocular depth evaluation on the Eigen Split. We converted the velodyne point data of the Eigen Test images in the numpy array format using code from [MonoDepth](https://github.com/mrharicot/monodepth). After downloading and unzipping it, you can merge with the KITTI raw data folder.  
+To save space further, the Velodyne point data in KITTI raw data can be deleted and optionally the [*Eigen Split Projected Depth*](https://drive.google.com/file/d/1a97lgOgrChkLxi_nvRpmbsKspveQ6EyD/view?usp=sharing) for the monocular depth evaluation on the Eigen Split can be downloaded. We converted the velodyne point data of the Eigen Test images in the numpy array format using code from [MonoDepth](https://github.com/mrharicot/monodepth). After downloading and unzipping it, it can be merged with the KITTI raw data folder.  
 
 ### On azure:
 Please execute the following steps after downloading the two datasets:
@@ -91,7 +124,7 @@ Please run main.py using the arguments --debug=False and --azure=False. Additona
 * "predict": Monocular Scene Flow estimator and predictor that processes three subsequent frames as inputs
 
 ### On azure:
-* Adjust the version number of the environment in "run_with_azure.py" according to the version you want to use
+* Adjust the version number of the environment in "run_with_azure.py" according to the desired version 
 * Type in the your subscription_id, resource_group and workspace_name in "run_with_azure.py" 
 * Run the file to start the training.
 
