@@ -30,22 +30,32 @@ class MonoSceneFlow(nn.Module):
         self.output_level = 4  # 4
         self.num_levels = 7
 
+        # Define activation functions:
+        self.sigmoid = torch.nn.Sigmoid()
         self.leakyRELU = nn.LeakyReLU(0.1, inplace=True)
 
+        # Define encoder
         if self._args.version == "correlation" or self._args.version == "diff" or self._args.version == "stacked" \
                 or self._args.version == "predict":
             self.feature_pyramid_extractor = FeatureExtractor(self.num_chs)
         if self._args.version == "concatenated_inputs":
             self.feature_pyramid_extractor = FeatureExtractor([2*3, 2*32, 2*64, 2*96, 2*128, 2*192])
 
+        # Define warping layer:
         self.warping_layer_sf = WarpingLayer_SF()
 
+        # Define decoder
         self.flow_estimators = nn.ModuleList()
         if self._args.version == "predict":
             self.flow_estimators_pred = nn.ModuleList()
         self.upconv_layers = nn.ModuleList()
 
+        # Define channels of correlation
         self.dim_corr = (self.search_range * 2 + 1) ** 2
+        self.corr_params = {"pad_size": self.search_range, "kernel_size": 1, "max_disp": self.search_range,
+                            "stride1": 1, "stride2": 1, "corr_multiply": 1}
+
+        # Define embedding dimension of Swin transformer
         if self._args.version == "predict":
             self.attention_chs = [120] * 5
         if self._args.version == "correlation" or self._args.version == "diff" or self._args.version == "stacked" or self._args.version == "concatenated_inputs":
@@ -103,16 +113,15 @@ class MonoSceneFlow(nn.Module):
                 layer_sf_pred = MonoSceneFlowDecoder(num_ch_in_pred)
                 self.flow_estimators_pred.append(layer_sf_pred)
 
-        self.corr_params = {"pad_size": self.search_range, "kernel_size": 1, "max_disp": self.search_range,
-                            "stride1": 1, "stride2": 1, "corr_multiply": 1}
+        # Define context network:
         self.context_networks = ContextNetwork(32 + 3 + 1, self._args)
         if self._args.version=="predict":
             self.context_networks_pred = ContextNetworkPred(32 + 3 + 1)
 
-        self.sigmoid = torch.nn.Sigmoid()
-
+        # Initialize modules defined so far:
         initialize_msra(self.modules())
 
+        # Define Swin transformers
         if self._args.version=="stacked" or self._args.version=="diff" or self._args.version=="predict":
             if args.version=="stacked":
                 factor = 2
@@ -144,25 +153,28 @@ class MonoSceneFlow(nn.Module):
                 string_k = "input_k_"
                 string_view = "l"
                 string_mode = "_aug"
-
             elif mode == "r_flip":
                 string_im = "input_"
                 string_k = "k_"
                 string_view = "r"
                 string_mode = "_flip"
 
-            # second last frame
+            # if predict: third last frame
+            # else: second last frame
             x1_raw = input_dict[string_im + string_view + str(1) + string_mode]
             k1 = input_dict[string_k + string_view + str(1) + string_mode]
-            # last frame
+            # if predict: second last frame
+            # else: last frame
             x2_raw = input_dict[string_im + string_view + str(2) + string_mode]
             k2 = input_dict[string_k + string_view + str(2) + string_mode]
 
         if self._args.version == "predict":
+            # last frame
             x3_raw = input_dict[string_im + string_view + str(3) + string_mode]
             k3 = input_dict[string_k + string_view + str(3) + string_mode]
 
         start = time.time()
+        # Compute feature pyramid:
         if self._args.version == "predict":
             x0_pyramid = self.feature_pyramid_extractor(x1_raw) + [x1_raw]
             x1_pyramid = self.feature_pyramid_extractor(x2_raw) + [x2_raw]
@@ -178,29 +190,36 @@ class MonoSceneFlow(nn.Module):
                 x1_pyramid.append(x12_pyramid[l][:, :int(x12_pyramid[l].size(1) / 2), :, :])
                 x2_pyramid.append(x12_pyramid[l][:, int(x12_pyramid[l].size(1) / 2):, :, :])
 
+        # Declaration of variables
         output_dict = {}
         sceneflows_f, sceneflows_b, disps_1, disps_2, pts_1, pts_2, pts_1tf, pts_2tf, output_depth_1, output_depth_2, attention_f_list,attention_b_list, corr_f_list, corr_b_list = [], [], [], [], [], [], [], [], [], [], [], [], [], []
         if self._args.version == "predict":
             sceneflows_f_pred, sceneflows_b_pred, disps_2_pred, disps_3_pred = [], [], [], []
+
+        # Loop through pyramid levels
         for l, (x1, x2) in enumerate(zip(x1_pyramid, x2_pyramid)):
 
             # warping
             if l == 0:
+                # Initialize warped features
                 x1_warp = x1
                 x2_warp = x2
 
             else:
+                # Increase spatial dimension of last level to fit the current level with bilinear interpolation
                 flow_f = interpolate2d_as(flow_f, x1, mode="bilinear")
                 flow_b = interpolate2d_as(flow_b, x1, mode="bilinear")
                 disp_l1 = interpolate2d_as(disp_l1, x1, mode="bilinear")
                 disp_l2 = interpolate2d_as(disp_l2, x1, mode="bilinear")
                 x1_out = self.upconv_layers[l - 1](x1_out)
                 x2_out = self.upconv_layers[l - 1](x2_out)
+                # Warp features of current level with estimated scene flow and disparity of last level
                 x2_warp, pts1, pts1_tf, output_depth1 = self.warping_layer_sf(x2, flow_f, disp_l1, k1, input_dict[
                     'aug_size'])  # becuase K can be changing when doing augmentation
                 x1_warp, pts2, pts2_tf, output_depth2 = self.warping_layer_sf(x1, flow_b, disp_l2, k2,
                                                                               input_dict['aug_size'])
                 if self._args.version == "predict":
+                    # Increase spatial dimension of last level to fit the current level with bilinear interpolation
                     flow_f_pred = interpolate2d_as(flow_f_pred, x1, mode="bilinear")
                     flow_b_pred = interpolate2d_as(flow_b_pred, x1, mode="bilinear")
                     disp_l2_pred = interpolate2d_as(disp_l2_pred, x1, mode="bilinear")
@@ -208,7 +227,7 @@ class MonoSceneFlow(nn.Module):
                     x2_out_pred = self.upconv_layers[l - 1](x2_out_pred)
                     x1_out_pred = self.upconv_layers[l - 1](x1_out_pred)
 
-            # corr or swin
+            # Compute correlation or attention
             if self._args.version=="stacked":
                 attention_f = self.corr_swin[l](torch.cat((x1, x2_warp),dim=1), l, self._args)
                 attention_b = self.corr_swin[l](torch.cat((x2, x1_warp),dim=1), l, self._args)
