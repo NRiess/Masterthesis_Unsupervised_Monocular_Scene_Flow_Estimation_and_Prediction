@@ -1,1 +1,0 @@
-from models.swin_model.build import build_model
