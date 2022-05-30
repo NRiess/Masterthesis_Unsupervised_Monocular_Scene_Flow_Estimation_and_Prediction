@@ -84,7 +84,7 @@ Please put the **`align_corners=True`** flag in the `grid_sample` function in th
 * Choose the file "Dockerfile"
 * Build the environment
 
-## Download dataset:
+## Download dataset
 
 Please download the following to datasets for the experiment:
   - [KITTI Raw Data](http://www.cvlibs.net/datasets/kitti/raw_data.php) (synced+rectified data, please refer [MonoDepth2](https://github.com/nianticlabs/monodepth2#-kitti-training-data) for downloading all data more easily)
