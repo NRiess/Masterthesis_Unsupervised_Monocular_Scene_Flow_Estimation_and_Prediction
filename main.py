@@ -2,17 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import os
 
-"""
-import subprocess
-os.chdir("./models/correlation_package")
-subprocess.check_call(["pip", "install", "."])
-os.chdir("../forwardwarp_package")
-subprocess.check_call(["pip", "install", "."])
-os.chdir("../..")
-os.makedirs('./runs', exist_ok=True)
-print('installed modules')
-"""
-
 import logging
 import torch
 from core import commandline, runtime, logger, tools, configuration as config
@@ -41,14 +30,6 @@ def main():
     # Configure model and loss
     model_and_loss = config.configure_model_and_loss(args)
 
-    def count_parameters(model):
-        return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-    # number_of_parameters1 = count_parameters(model_and_loss.model.flow_estimators)/1000000
-    # number_of_parameters2 = count_parameters(model_and_loss.model.feature_pyramid_extractor)/1000000
-    # # number_of_parameters3 = count_parameters(model_and_loss.model.upconv_layers_mod)/1000000
-    # number_of_parameters4 = count_parameters(model_and_loss.model.corr_swin)/1000000
-
     # Resume from checkpoint if available
     checkpoint_saver, checkpoint_stats = config.configure_checkpoint_saver(args, model_and_loss)
 
@@ -56,14 +37,6 @@ def main():
         # Set checkpoint stats
         if args.checkpoint_mode in ["resume_from_best", "resume_from_latest"]:
             args.start_epoch = checkpoint_stats["epoch"] + 1
-
-    # # Multi-GPU automation
-    # with logger.LoggingBlock("Multi GPU", emph=True):
-    #     if torch.cuda.device_count() > 1:
-    #         logging.info("Let's use %d GPUs!" % torch.cuda.device_count())
-    #         model_and_loss._model = torch.nn.DataParallel(model_and_loss._model)
-    #     else:
-    #         logging.info("Let's use %d GPU!" % torch.cuda.device_count())
 
     # Checkpoint and save directory
     with logger.LoggingBlock("Save Directory", emph=True):
