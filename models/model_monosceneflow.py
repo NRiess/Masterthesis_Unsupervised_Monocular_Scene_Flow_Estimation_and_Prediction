@@ -17,7 +17,7 @@ from utils.interpolation import interpolate2d_as
 from utils.sceneflow_util import flow_horizontal_flip, intrinsic_scale, get_pixelgrid, post_processing
 
 from models.swin_model import build_model
-from config_swin import get_config
+from models.swin_model.config_swin import get_config
 import time
 
 class MonoSceneFlow(nn.Module):
