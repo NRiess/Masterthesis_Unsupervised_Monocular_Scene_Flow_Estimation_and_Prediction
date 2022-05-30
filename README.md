@@ -64,6 +64,8 @@ pip install yacs==0.1.8
 pip install matplotlib==3.5.2
 pip install open3d==0.15.2
 pip install protobuf==3.19.4
+pip install azureml==0.2.7
+pip install azureml.core==1.42.0
   ```
 can be executed to install the remaining packages.
   
